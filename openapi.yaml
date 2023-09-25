@@ -6,164 +6,139 @@ info:
 
 # TODO: 下の情報を参考に今回のプロダクト用のシステムに修正する
 paths:
-  /sections:
+  /desk:
     get:
       tags:
-        - section
-      operationId: get-sections
-      description: 課の一覧
+        - desk
+      operationId: get-desks
+      description: 座席情報の一覧
       responses:
         "200":
-          $ref: "#/components/responses/SectionArray"
-      x-amazon-apigateway-integration:
-        uri: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetSectionsFunction.Arn}/invocations"
-        httpMethod: POST
-        type: aws_proxy
-        passthroughBehavior: "when_no_match"
-    post:
+          $ref: "#/components/responses/DeskArray"
+  /desk/{desk_id}:
+    put:
       tags:
-        - section
-      operationId: post-section-entry
-      description: 課の作成
-      requestBody:
-        $ref: "#/components/requestBodies/CreateSection"
-      responses:
-        "201":
-          $ref: "#/components/responses/Section"
-        "409":
-          $ref: "#/components/responses/409Conflict"
-      x-amazon-apigateway-integration:
-        uri: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PostSectionEntryFunction.Arn}/invocations"
-        httpMethod: POST
-        type: aws_proxy
-        passthroughBehavior: "when_no_match"
-  /diary/users/{user_id}:
-    post:
-      tags:
-        - user_diary
-      description: 日報を作成
-      operationId: post-user-diary-entry
+        - desk
+      operationId: put-desk-registration
+      description: 着席位置の登録（入室）
       parameters:
-        - $ref: "#/components/parameters/user_id_path"
+        - $ref: "#/components/parameters/desk_id_path"
       requestBody:
-        $ref: "#/components/requestBodies/PostUserDiary"
+        $ref: "#/components/requestBodies/RegisterDesk"
       responses:
-        "201":
-          $ref: "#/components/responses/UserDiary"
-        "404":
-          $ref: "#/components/responses/404NotFound"
+        "200":
+          $ref: "#/components/responses/Desk"
         "409":
           $ref: "#/components/responses/409Conflict"
-      x-amazon-apigateway-integration:
-        uri: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PostUserDiaryFunction.Arn}/invocations"
-        httpMethod: POST
-        type: aws_proxy
-        passthroughBehavior: "when_no_match"
+    delete:
+      tags:
+        - desk
+      operationId: delete-desk-unregistration
+      description: 着席情報の削除（退室）
+      parameters:
+        - $ref: "#/components/parameters/desk_id_path"
+      requestBody:
+        $ref: "#/components/requestBodies/RegisterDesk"
+      responses:
+        "200":
+          $ref: "#/components/responses/Desk"
 
 components:
   schemas:
-    createdAt:
-      type: string
-      format: datetime
-      description: 作成日時
-      readOnly: true
-      example: 2020-01-01T00:00:00+09:00
-    updatedAt:
-      type: string
-      format: datetime
-      description: 更新日時
-      readOnly: true
-      example: 2020-01-01T00:00:00+09:00
-    SectionId:
-      type: integer
-      format: int32
-      description: 課ID
-      readOnly: true
-      minimum: 0
-      example: 0
-    Section:
-      type: object
-      properties:
-        section_id:
-          $ref: "#/components/schemas/SectionId"
-        name:
-          type: string
-          description: 課名
-          example: 営業課
-          readOnly: false
-        icon:
-          type: string
-          description: 課のアイコン名
-          example: sales
-          readOnly: false
-        created_at:
-          $ref: "#/components/schemas/createdAt"
-        updated_at:
-          $ref: "#/components/schemas/updatedAt"
-      required:
-        - seccion_id
-        - name
-        - icon
-        - created_at
-        - updated_at
-
-    UserId:
+    DeskID:
       type: string
       format: uuid
-      description: ユーザーID
-      readOnly: true
+      description: 机のID
       example: 4f73ab32-21bf-47ef-a119-fa024bc2b9cc
+    Email:
+      type: string
+      nullable: true
+      description: ユーザーのEメール
+      readOnly: true
+      example: aaa.bbb.cc@tut.jp
+    UserName:
+      type: string
+      nullable: true
+      readOnly: true
+      example: 田中夏子
+
+    Desk:
+      type: object
+      properties:
+        desk_id:
+          $ref: "#/components/schemas/DeskID"
+        room:
+          type: string
+          description: f-301 or f-310
+          example: f-301
+        email:
+          $ref: "#/components/schemas/Email"
+        username:
+          $ref: "#/components/schemas/UserName"
+        position:
+          type: object
+          description: 机の位置
+          properties:
+            x:
+              type: integer
+              description: 机のx座標
+              example: 0
+            y:
+              type: integer
+              description: 机のy座標
+              example: 0
+        size:
+          type: object
+          description: 机の大きさ
+          properties:
+            x:
+              type: integer
+              description: 机の横方向のサイズ
+              example: 10
+            y:
+              type: integer
+              description: 机の縦方向のサイズ
+              example: 10
+        timestamp:
+          properties:
+            createdAt:
+              type: string
+              format: datetime
+              description: 作成日時
+              readOnly: true
+              example: 2020-01-01T00:00:00+09:00
+            updatedAt:
+              type: string
+              format: datetime
+              description: 更新日時
+              readOnly: true
+              example: 2020-01-01T00:00:00+09:00
+      required:
+        - desk_id
+        - email
+        - username
+        - position
+        - size
+        - timestamp
+
     User:
       type: object
       properties:
-        name:
-          type: string
-          example: 田中夏子
-          readOnly: false
-        icon:
-          type: string
-          example: /user_1.png
-          readOnly: false
+        username:
+          $ref: "#/components/schemas/UserName"
         email:
-          type: string
-          format: email
-          example: tanaka.natsuko@tarako
-          readOnly: false
-        section_id:
-          allOf:
-            - $ref: "#/components/schemas/SectionId"
-          readOnly: false
-        user_id:
-          $ref: "#/components/schemas/UserId"
-        created_at:
-          $ref: "#/components/schemas/createdAt"
-        updated_at:
-          $ref: "#/components/schemas/updatedAt"
+          $ref: "#/components/schemas/Email"
       required:
-        - name
+        - username
         - email
-        - section_id
-        - user_id
-        - icon
-        - created_at
-        - updated_at
 
   parameters:
-    section_id_path:
-      name: section_id
+    desk_id_path:
+      name: desk_id
       in: path
       required: True
       schema:
-        $ref: '#/components/schemas/SectionId'
-    user_id_query:
-      name: user_id
-      in: query
-      description: ユーザー絞り込み。note_assignedがtrueの場合、無視される。複数のユーザーを指定可能
-      required: False
-      schema:
-        type: array
-        items:
-          $ref: "#/components/schemas/UserId"
+        $ref: '#/components/schemas/DeskID'
 
   responses:
     DeleteSuccess:
@@ -174,29 +149,20 @@ components:
       description: The request could not be completed due to a conflict with the current state of the target resource.
     UnauthorizedError:
       description: Access token is missing or invalid
-    Section:
-      description: 課の詳細
+    Desk:
+      description: 机の詳細
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/Section"
-    SectionArray:
-      description: 課の一覧
+            $ref: "#/components/schemas/Desk"
+    DeskArray:
+      description: 机の一覧
       content:
         application/json:
           schema:
             type: array
             items:
-              $ref: "#/components/schemas/Section"
-            example:
-              - section_id: 0
-                name: 営業課
-                created_at: 2020-01-01T00:00:00+09:00
-                updated_at: 2020-01-01T00:00:00+09:00
-              - section_id: 1
-                name: 管理課
-                created_at: 2020-01-01T00:00:00+09:00
-                updated_at: 2020-01-01T00:00:00+09:00
+              $ref: "#/components/schemas/Desk"
     User:
       description: ユーザーの詳細
       content:
@@ -211,200 +177,10 @@ components:
             type: array
             items:
               $ref: "#/components/schemas/User"
-            example:
-              - user_id: 4f73ab32-21bf-47ef-a119-fa024bc2b9cc
-                name: 田中夏子
-                description: 田中夏子です。よろしくお願いします。趣味は読書です。
-                section:
-                  section_id: 0
-                  name: 営業課
-                  created_at: 2020-01-01T00:00:00+09:00
-                  updated_at: 2020-01-01T00:00:00+09:00
-                email: tanaka.natsuko@tarako
-                icon: /user_1.png
-              - user_id: 595c060d-8417-4ac8-bcb5-c8e733dc64e0
-                name: 山田太郎
-                description: 山田太郎です。よろしくお願いします。趣味は野球です。
-                section:
-                  section_id: 0
-                  name: 営業課
-                  created_at: 2020-01-01T00:00:00+09:00
-                  updated_at: 2020-01-01T00:00:00+09:00
-                email: yamada.taro@tarako
-                icon: /user_2.png
-              - user_id: e08bf311-b1bc-4a38-bac1-374c3ede7203
-                name: 管理五郎
-                description: 管理者五郎です。よろしくお願いします。人と関わる仕事が好きです。
-                section:
-                  section_id: 1
-                  name: 管理課
-                  created_at: 2020-01-01T00:00:00+09:00
-                  updated_at: 2020-01-01T00:00:00+09:00
-                email: admin.goro@tarako
-                icon: /admin.png
-    Task:
-      description: タスクの詳細
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/Task"
-    TaskArray:
-      description: タスクの一覧
-      content:
-        application/json:
-          schema:
-            type: array
-            items:
-              $ref: "#/components/schemas/Task"
-    CreateTaskResponse:
-      description: タスクの更新を提案する
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              task:
-                $ref: "#/components/schemas/Task"
-              message:
-                type: string
-                description: タスクの作成を通知する
-                example: 新しいタスクを作成しました。
-    SuggestResponse:
-      description: タスクの更新を提案する
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              originTask:
-                $ref: "#/components/schemas/Task"
-              updatedTask:
-                $ref: "#/components/schemas/Task"
-              message:
-                type: string
-                description: 提案の理由
-                example: 似たタスクを発見しました。\nこちらのタスクを更新しますか？
-    UserDiary:
-      description: ユーザーの日報の詳細
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/UserDiary"
-    UserDiaryArray:
-      description: ユーザーの日報一覧
-      content:
-        application/json:
-          schema:
-            type: array
-            items:
-              $ref: "#/components/schemas/UserDiary"
-    SectionDiary:
-      description: 課の日報の詳細
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/SectionDiary"
-    SectionDiaryArray:
-      description: 課の日報一覧
-      content:
-        application/json:
-          schema:
-            type: array
-            items:
-              $ref: "#/components/schemas/SectionDiary"
-    Chat:
-      description: チャット履歴の詳細
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/Chat"
-    ChatArray:
-      description: チャット履歴一覧
-      content:
-        application/json:
-          schema:
-            type: array
-            items:
-              $ref: "#/components/schemas/Chat"
-
   requestBodies:
-    CreateSection:
+    RegisterDesk:
       required: true
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/Section"
-    UpdateSection:
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/Section"
-    EditSection:
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/Section"
-    CreateTask:
-      required: true
-      content:
-        application/json:
-        # multipart/form-data:
-          schema:
-            $ref: '#/components/schemas/RequestTask'
-            # $ref: '#/components/schemas/RequestTaskAndFile'
-    UpdateTask:
-      required: true
-      content:
-        application/json:
-          schema:
-            allOf:
-              - $ref: '#/components/schemas/Task'
-            type: object
-            properties:
-              assigned_to:
-                allOf:
-                  - $ref: '#/components/schemas/UserId'
-                nullable: true
-                readOnly: false
-    CreateUser:
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/User"
-    UpdateUser:
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/User"
-    PostUserDiary:
-      required: true
-      description: 日報の作成
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/CreateUserDiary"
-    PostSectionDiary:
-      required: true
-      description: 日報の作成
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/CreateSectionDiary"
-    PutUserDiary:
-      required: true
-      description: 日報の更新
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/UserDiary"
-    PutSectionDiary:
-      required: true
-      description: 日報の更新
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/SectionDiary"
+            $ref: "#/components/schemas/Desk"
