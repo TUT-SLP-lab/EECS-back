@@ -99,20 +99,19 @@ components:
               type: integer
               description: 机の縦方向のサイズ
               example: 10
-        timestamp:
-          properties:
-            createdAt:
-              type: string
-              format: datetime
-              description: 作成日時
-              readOnly: true
-              example: 2020-01-01T00:00:00+09:00
-            updatedAt:
-              type: string
-              format: datetime
-              description: 更新日時
-              readOnly: true
-              example: 2020-01-01T00:00:00+09:00
+        # timestamp:
+        created_at:
+          type: string
+          format: datetime
+          description: 作成日時
+          readOnly: true
+          example: 2020-01-01T00:00:00+09:00
+        update_at:
+          type: string
+          format: datetime
+          description: 更新日時
+          readOnly: true
+          example: 2020-01-01T00:00:00+09:00
       required:
         - desk_id
         - email
