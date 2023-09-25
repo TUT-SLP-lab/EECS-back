@@ -1,0 +1,244 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: "AWS::Serverless-2016-10-31"
+Description: >-
+  EECS API Resource template
+
+Parameters:
+  ProductName:
+    Type: String
+    Description: product name
+    Default: EECS
+  PrNumber:
+    Type: String
+    Description: PR number
+    Default: "dev"
+  StageName:
+    Type: String
+    Description: Staging name
+    Default: prod
+  SlackClientId:
+    Type: String
+    Description: Slack App Client ID
+  SlackClientSecret:
+    Type: String
+    Description: Slack App Client Secret
+  SenderEmail:
+    Type: String
+    Description: from address using cognito
+  ClientURL:
+    Type: String
+    Description: System Client URL
+    Default: https://example.com
+
+Globals:
+  Function:
+    Timeout: 120
+    Runtime: python3.10
+    Environment:
+      Variables:
+        PR_NUM: !Ref PrNumber
+    Layers:
+      - !Ref LambdaLayer
+
+Resources:
+  ApiGateway:
+    Type: "AWS::Serverless::HttpApi"
+    Properties:
+      Name: !Sub ${ProductName}-${PrNumber}
+      Cors:
+        AllowOrigin: "'*'"
+        AllowMethods: "'GET,POST,PUT,DELETE,OPTIONS'"
+        AllowHeaders: "'Content-Type,X-CSRF-TOKEN'"
+      Auth:
+        DefaultAuthorizer: EECSAuthorizer
+        Authorizers:
+          EECSAuthorizer:
+            UserPoolArn: !GetAtt CognitoUserPool.Arn
+
+  LambdaLayer:
+    Type: 'AWS::Serverless::LayerVersion'
+    Properties:
+      LayerName: !Sub ${ProductName}-Layer-${PrNumber}
+      Description: 'Tarako Lambda Layer'
+      ContentUri: ./layer/
+      CompatibleRuntimes:
+        - python3.10
+      RetentionPolicy: Retain
+    Metadata:
+      BuildMethod: python3.10
+
+  LambdaExecutionRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      RoleName: !Sub ${ProductName}-LambdaExecutionRole-${PrNumber}
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: DynamoDBAccessPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:*
+                Resource:
+                  - !GetAtt QuestionResponseTable.Arn
+                  - !GetAtt QuestionResponseTable.Arn
+
+  # Lambda Functions
+  GetDesks:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      CodeUri: app/desks/
+      Handler: gets.lambda_handler
+      FunctionName: !Sub ${ProductName}-get-desks-${PrNumber}
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Events:
+        GetDesksEvent:
+          Type: HttpApi
+          Properties:
+            Path: /desk
+            Method: get
+            ApiId: !Ref ApiGateway
+  DeskRegistration:
+    Type: "AWS::Serverless::Function"
+    Properties:
+      CodeUri: app/seat/
+      Handler: post.lambda_handler
+      FunctionName: !Sub ${ProductName}-desk-registration-${PrNumber}
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Events:
+        PutDeskRegistrationEvent:
+          Type: HttpApi
+          Properties:
+            Path: /desk/{desk_id}
+            Method: put
+            ApiId: !Ref ApiGateway
+  DeskUnregistration:
+    Type: "AWS::Serverless::Function"
+    Properties:
+      CodeUri: app/seat/
+      Handler: delete.lambda_handler
+      FunctionName: !Sub ${ProductName}-desk-unregistration-${PrNumber}
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Events:
+        PutDeskRegistrationEvent:
+          Type: HttpApi
+          Properties:
+            Path: /desk/{desk_id}
+            Method: delete
+            ApiId: !Ref ApiGateway
+
+  # Dynamodb Tables
+  DeskTable:
+    Type: "AWS::DynamoDB::Table"
+    Properties:
+      TableName: !Sub ${ProductName}-DeskTable-${PrNumber}
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: question_id
+          AttributeType: N
+      KeySchema:
+        - AttributeName: question_id
+          KeyType: HASH
+
+  # Cognito
+  CognitoUserPool:
+    Type: "AWS::Cognito::UserPool"
+    Properties:
+      UserPoolName: !Sub ${ProductName}-CognitoUserPool-${PrNumber}
+      Schema:
+        - Name: "sub"
+          AttributeDataType: "String"
+          DeveloperOnlyAttribute: false
+          Mutable: false
+          Required: true
+          StringAttributeConstraints:
+            MinLength: "1"
+            MaxLength: "2048"
+        - Name: "name"
+          AttributeDataType: "String"
+          DeveloperOnlyAttribute: false
+          Mutable: true
+          Required: true
+          StringAttributeConstraints:
+            MinLength: "0"
+            MaxLength: "2048"
+        - Name: "email"
+          AttributeDataType: "String"
+          DeveloperOnlyAttribute: false
+          Mutable: true
+          Required: true
+          StringAttributeConstraints:
+            MinLength: "0"
+            MaxLength: "2048"
+        - Name: "identities"
+          AttributeDataType: "String"
+          DeveloperOnlyAttribute: false
+          Mutable: true
+          Required: false
+          StringAttributeConstraints: {}
+      AutoVerifiedAttributes:
+        - "email"
+      UsernameAttributes:
+        - "email"
+      MfaConfiguration: "OFF"
+      EmailConfiguration:
+        SourceArn: !Sub "arn:aws:ses:${AWS::Region}:${AWS::AccountId}:identity/${SenderEmail}"
+        EmailSendingAccount: "DEVELOPER"
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: true
+
+  CognitoUserPoolClient:
+    Type: "AWS::Cognito::UserPoolClient"
+    Properties:
+      UserPoolId: !Ref CognitoUserPool
+      ClientName: !Sub ${ProductName}-CognitoUserPoolClient-${PrNumber}
+      RefreshTokenValidity: 30
+      ExplicitAuthFlows:
+        - "ALLOW_REFRESH_TOKEN_AUTH"
+      PreventUserExistenceErrors: "ENABLED"
+      SupportedIdentityProviders:
+        - "Slack"
+      GenerateSecret: false
+      CallbackURLs:
+        - !Ref ClientURL
+      AllowedOAuthFlows:
+        - "code"
+      AllowedOAuthScopes:
+        - "email"
+        - "openid"
+        - "profile"
+      AllowedOAuthFlowsUserPoolClient: true
+      IdTokenValidity: 30
+      AccessTokenValidity: 30
+      TokenValidityUnits:
+          AccessToken: "days"
+          IdToken: "days"
+          RefreshToken: "days"
+
+  SlackIdentityProvider:
+    Type: "AWS::Cognito::UserPoolIdentityProvider"
+    Properties:
+      ProviderName: Slack
+      ProviderType: "OIDC"
+      UserPoolId: !Ref CognitoUserPool
+      ProviderDetails:
+        client_id: !Ref SlackClientId
+        client_secret: !Ref SlackClientSecret
+        attributes_request_method: "GET"
+        oidc_issuer: https://slack.com
+        authorize_scopes: "email profile openid"
+      AttributeMapping:
+        email: "email"
+        name: "name"
+
+Outputs:
+  ApiUrl:
+    Description: 'API Gateway endpoint URL for Prod stage'
+    Value: !Sub 'https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/${StageName}'
