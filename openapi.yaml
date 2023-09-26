@@ -23,8 +23,6 @@ paths:
       description: 着席位置の登録（入室）
       parameters:
         - $ref: "#/components/parameters/desk_id_path"
-      requestBody:
-        $ref: "#/components/requestBodies/RegisterDesk"
       responses:
         "200":
           $ref: "#/components/responses/Desk"
@@ -37,8 +35,6 @@ paths:
       description: 着席情報の削除（退室）
       parameters:
         - $ref: "#/components/parameters/desk_id_path"
-      requestBody:
-        $ref: "#/components/requestBodies/RegisterDesk"
       responses:
         "200":
           $ref: "#/components/responses/Desk"
@@ -176,10 +172,3 @@ components:
             type: array
             items:
               $ref: "#/components/schemas/User"
-  requestBodies:
-    RegisterDesk:
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/Desk"
