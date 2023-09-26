@@ -218,7 +218,7 @@ Resources:
         - "ALLOW_REFRESH_TOKEN_AUTH"
       PreventUserExistenceErrors: "ENABLED"
       SupportedIdentityProviders:
-        - "Slack"
+        - !Ref SlackIdentityProvider
       GenerateSecret: false
       CallbackURLs:
         - !Ref ClientURL
