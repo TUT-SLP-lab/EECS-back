@@ -42,17 +42,21 @@ Globals:
 
 Resources:
   ApiGateway:
-    Type: "AWS::Serverless::HttpApi"
+    Type: "AWS::Serverless::Api"
     Properties:
       Name: !Sub ${ProductName}-${PrNumber}
+      StageName: !Ref StageName
       Cors:
-        AllowOrigin: "'*'"
+        AllowOrigin: !Sub "'${ClientURL}'"
         AllowMethods: "'GET,POST,PUT,DELETE,OPTIONS'"
         AllowHeaders: "'Content-Type,X-CSRF-TOKEN'"
+        MaxAge: "'600'"
+        AllowCredentials: true
       Auth:
-        DefaultAuthorizer: EECSAuthorizer
+        AddDefaultAuthorizerToCorsPreflight: false
+        DefaultAuthorizer: SlackAuth
         Authorizers:
-          EECSAuthorizer:
+          SlackAuth:
             UserPoolArn: !GetAtt CognitoUserPool.Arn
 
   LambdaLayer:
@@ -87,8 +91,7 @@ Resources:
                 Action:
                   - dynamodb:*
                 Resource:
-                  - !GetAtt QuestionResponseTable.Arn
-                  - !GetAtt QuestionResponseTable.Arn
+                  - !GetAtt DeskTable.Arn
 
   # Lambda Functions
   GetDesks:
@@ -100,11 +103,11 @@ Resources:
       Role: !GetAtt LambdaExecutionRole.Arn
       Events:
         GetDesksEvent:
-          Type: HttpApi
+          Type: Api
           Properties:
             Path: /desk
-            Method: get
-            ApiId: !Ref ApiGateway
+            Method: GET
+            RestApiId: !Ref ApiGateway
   DeskRegistration:
     Type: "AWS::Serverless::Function"
     Properties:
@@ -114,11 +117,11 @@ Resources:
       Role: !GetAtt LambdaExecutionRole.Arn
       Events:
         PutDeskRegistrationEvent:
-          Type: HttpApi
+          Type: Api
           Properties:
             Path: /desk/{desk_id}
-            Method: put
-            ApiId: !Ref ApiGateway
+            Method: PUT
+            RestApiId: !Ref ApiGateway
   DeskUnregistration:
     Type: "AWS::Serverless::Function"
     Properties:
@@ -128,11 +131,11 @@ Resources:
       Role: !GetAtt LambdaExecutionRole.Arn
       Events:
         PutDeskRegistrationEvent:
-          Type: HttpApi
+          Type: Api
           Properties:
             Path: /desk/{desk_id}
-            Method: delete
-            ApiId: !Ref ApiGateway
+            Method: DELETE
+            RestApiId: !Ref ApiGateway
 
   # Dynamodb Tables
   DeskTable:
@@ -141,11 +144,20 @@ Resources:
       TableName: !Sub ${ProductName}-DeskTable-${PrNumber}
       BillingMode: PAY_PER_REQUEST
       AttributeDefinitions:
-        - AttributeName: question_id
-          AttributeType: N
+        - AttributeName: desk_id
+          AttributeType: S
+        - AttributeName: email
+          AttributeType: S
       KeySchema:
-        - AttributeName: question_id
+        - AttributeName: desk_id
           KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: EmailIndex
+          KeySchema:
+            - AttributeName: email
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
 
   # Cognito
   CognitoUserPool:
