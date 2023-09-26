@@ -1,23 +1,27 @@
 GET_HEADER = {
-    "Access-Control-Allow-Origin": "*",
+    # "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Origin": "localhost:3001",
     "Access-Control-Allow-Methods": "GET",
     "Access-Control-Allow-Headers": "Content-Type,X-CSRF-TOKEN",
 }
 
 POST_HEADER = {
-    "Access-Control-Allow-Origin": "*",
+    # "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Origin": "localhost:3001",
     "Access-Control-Allow-Methods": "POST",
     "Access-Control-Allow-Headers": "Content-Type,X-CSRF-TOKEN",
 }
 
 PUT_HEADER = {
-    "Access-Control-Allow-Origin": "*",
+    # "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Origin": "localhost:3001",
     "Access-Control-Allow-Methods": "PUT",
     "Access-Control-Allow-Headers": "Content-Type,X-CSRF-TOKEN",
 }
 
 DELETE_HEADER = {
-    "Access-Control-Allow-Origin": "*",
+    # "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Origin": "localhost:3001",
     "Access-Control-Allow-Methods": "DELETE",
     "Access-Control-Allow-Headers": "Content-Type,X-CSRF-TOKEN",
 }
