@@ -1,5 +1,5 @@
 import datetime
-from table_utils import DynamoDBError, get_item, put_item, qa_table, json_dumps
+from table_utils import DynamoDBError, put_item, qa_table, json_dumps
 from responses import delete_response
 
 def lambda_handler(event, context):

@@ -1,17 +1,22 @@
 import datetime
+import json
+import base64
 from boto3.dynamodb.conditions import Key
 
 from table_utils import DynamoDBError, get_item, put_item, qa_table, json_dumps
-from responses import put_response, delete_response
+from responses import put_response
 
 def lambda_handler(event, context):
     ppm = event.get("pathParameters", {})
     if ppm is None:
         return put_response(400, "Bad Request: Invalid path parameters")
-
     desk_id = ppm.get("desk_id", None)
-    username = ppm.get("username", None)
-    email = ppm.get("email", None)
+    token = event.get("headers").get("Authorization")
+    payload=base64.b64decode(token)
+    payload=json.loads(payload)
+
+    username = payload
+    email =
 
     # 他の机に名前がある場合 -> 名前とEmailを削除
     try:
@@ -34,9 +39,9 @@ def lambda_handler(event, context):
         try:
             put_item(qa_table, "desk_id", delete_desk_id, expr, update_object)
         except DynamoDBError as e:
-            return delete_response(500, f"Internal Server Error: DynamoDB Error: {e}")
+            return put_response(500, f"Internal Server Error: DynamoDB Error: {e}")
         except IndexError as e:
-            return delete_response(404, f"Not Found: {e}")
+            return put_response(404, f"Not Found: {e}")
     except IndexError:
         pass
 
