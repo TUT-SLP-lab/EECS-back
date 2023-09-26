@@ -1,5 +1,6 @@
-from table_utils import get_all_items, qa_table, json_dumps
 from responses import get_response
+from table_utils import get_all_items, json_dumps, qa_table
+
 
 def lambda_handler(event, context):
     try:
