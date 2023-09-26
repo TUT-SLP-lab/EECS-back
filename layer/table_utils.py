@@ -1,17 +1,21 @@
-import os
+import os, datetime, json
 
 import boto3
 from boto3.dynamodb.conditions import Key
 
 PR_NUM = os.environ["PR_NUM"]
 
-# TODO: TABLE名を用意する。
-# LIKE: QA_TABLE = f"qa-{PR_NUM}"
+# TODO: TABLE名を用意する。DeskTable_
+# LIKE: QA_TABLE = f"DeskTable-{PR_NUM}"
+QA_TABLE = f"DeskTable-{PR_NUM}"
 
 dynamodb = boto3.resource("dynamodb")
 # TODO: TABLEを用意する。
 # LIKE: qa_table = dynamodb.Table(QA_TABLE)
+qa_table = dynamodb.Table(QA_TABLE)
 
+def json_dumps(obj):
+    return json.dumps(obj, ensure_ascii=False)
 
 def get_all_items(table) -> list:
     """
@@ -74,7 +78,71 @@ def get_item(table, key: str, value: str) -> dict:
 
 
 # TODO: POST, PUT, DELETEの実装
+def post_item(table, item: dict) -> dict:
+    """テーブルにアイテムを追加する
+    Args:
+        table (boto3.resource.Table): テーブル
+        item (dict): アイテム
+    Returns:
+        dict: アイテム
+    Raises:
+        DynamoDBError: DynamoDBのエラー
+    """
+    response = table.put_item(Item=item, ReturnValues="NONE")
+    if response["ResponseMetadata"]["HTTPStatusCode"] != 200:
+        raise DynamoDBError(f"Failed to find {table.name}")
+    return item
 
+
+def put_item(table, key: str, value: str, UpdExp: str, ExpAtt: dict, ExpAttName: dict = None) -> dict:
+    """テーブルにアイテムを追加する
+    Args:
+        table (boto3.resource.Table): テーブル
+        key (str): キー
+        value (str): 値
+        UpdExp (str): UpdateExpression
+        ExpAtt (dict): ExpressionAttributeValues
+    Returns:
+        dict: アイテム
+    Raises:
+        DynamoDBError: DynamoDBのエラー
+    """
+    if ExpAttName is None:
+        response = table.update_item(
+            Key={key: value},
+            UpdateExpression=UpdExp,
+            ExpressionAttributeValues=ExpAtt,
+            ReturnValues="ALL_NEW",
+        )
+    else:
+        response = table.update_item(
+            Key={key: value},
+            UpdateExpression=UpdExp,
+            ExpressionAttributeValues=ExpAtt,
+            ExpressionAttributeNames=ExpAttName,
+            ReturnValues="ALL_NEW",
+        )
+    if response["ResponseMetadata"]["HTTPStatusCode"] != 200:
+        raise DynamoDBError(f"Failed to find {table.name} with {key}: {value}")
+    if "Attributes" not in response:
+        raise IndexError(f"Attributes of {table.name} is not found with {value}")
+    return response["Attributes"]
+
+
+def delete_item(table, key: str, value: str) -> dict:
+    """テーブルからアイテムを削除する
+    Args:
+        table (boto3.resource.Table): テーブル
+        key (str): キー
+        value (str): 値
+    Returns:
+        dict: アイテム
+    Raises:
+        DynamoDBError: DynamoDBのエラー
+    """
+    response = table.delete_item(Key={key: value}, ReturnValues="NONE")
+    if response["ResponseMetadata"]["HTTPStatusCode"] != 200:
+        raise DynamoDBError(f"Failed to find {table.name} with {key}: {value}")
 
 class DynamoDBError(Exception):
     pass
