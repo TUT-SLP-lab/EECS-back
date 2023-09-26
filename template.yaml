@@ -208,6 +208,8 @@ Resources:
 
   CognitoUserPoolClient:
     Type: "AWS::Cognito::UserPoolClient"
+    DependsOn: 
+      - SlackIdentityProvider
     Properties:
       UserPoolId: !Ref CognitoUserPool
       ClientName: !Sub ${ProductName}-CognitoUserPoolClient-${PrNumber}
