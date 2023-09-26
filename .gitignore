@@ -158,3 +158,14 @@ cython_debug/
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
+# Created by https://www.toptal.com/developers/gitignore/api/sam
+# Edit at https://www.toptal.com/developers/gitignore?templates=sam
+
+### SAM ###
+# Ignore build directories for the AWS Serverless Application Model (SAM)
+# Info: https://aws.amazon.com/serverless/sam/
+# Docs: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-reference.html
+
+**/.aws-sam
+
+# End of https://www.toptal.com/developers/gitignore/api/sam

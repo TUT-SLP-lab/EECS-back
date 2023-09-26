@@ -1,0 +1,23 @@
+name: Deploy AWS on main branch
+
+on:
+  push:
+    branches:
+      - 'main'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/deploy_job_template.yaml
+    with:
+      pr-number: main
+      stack-name: EECS-main
+      s3-dir: main
+    secrets:
+      AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+      AWS_GITHUB_OIDC_ROLE_NAME: ${{ secrets.AWS_GITHUB_OIDC_ROLE_NAME }}
+      SLACK_APP_CLIENT_ID: ${{ secrets.SLACK_APP_CLIENT_ID }}
+      SLACK_APP_CLIENT_SECRET: ${{ secrets.SLACK_APP_CLIENT_SECRET }}
+      SENDER_EMAIL: ${{ secrets.SENDER_EMAIL }}
+      CLIENT_URL: ${{ secrets.CLIENT_URL }}
