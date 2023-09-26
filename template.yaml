@@ -237,18 +237,20 @@ Resources:
   SlackIdentityProvider:
     Type: "AWS::Cognito::UserPoolIdentityProvider"
     Properties:
-      ProviderName: Slack
-      ProviderType: "OIDC"
-      UserPoolId: !Ref CognitoUserPool
-      ProviderDetails:
-        client_id: !Ref SlackClientId
-        client_secret: !Ref SlackClientSecret
-        attributes_request_method: "GET"
-        oidc_issuer: https://slack.com
-        authorize_scopes: "email profile openid"
       AttributeMapping:
         email: "email"
         name: "name"
+        username: "sub"
+      ProviderDetails:
+        attributes_request_method: "GET"
+        attributes_url_add_attributes: "false"
+        authorize_scopes: "email profile openid"
+        client_id: !Ref SlackClientId
+        client_secret: !Ref SlackClientSecret
+        oidc_issuer: https://slack.com
+      ProviderName: Slack
+      ProviderType: "OIDC"
+      UserPoolId: !Ref CognitoUserPool
 
 Outputs:
   ApiUrl:
