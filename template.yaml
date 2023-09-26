@@ -248,7 +248,7 @@ Resources:
         client_id: !Ref SlackClientId
         client_secret: !Ref SlackClientSecret
         oidc_issuer: https://slack.com
-      ProviderName: Slack
+      ProviderName: !Sub ${ProductName}-SlackIdentityProvider-${PrNumber}
       ProviderType: "OIDC"
       UserPoolId: !Ref CognitoUserPool
 
