@@ -1,21 +1,20 @@
-import os, datetime, json
+import datetime
+import json
+import os
 
 import boto3
 from boto3.dynamodb.conditions import Key
 
 PR_NUM = os.environ["PR_NUM"]
-
-# TODO: TABLE名を用意する。DeskTable_
-# LIKE: QA_TABLE = f"DeskTable-{PR_NUM}"
 QA_TABLE = f"DeskTable-{PR_NUM}"
 
 dynamodb = boto3.resource("dynamodb")
-# TODO: TABLEを用意する。
-# LIKE: qa_table = dynamodb.Table(QA_TABLE)
 qa_table = dynamodb.Table(QA_TABLE)
+
 
 def json_dumps(obj):
     return json.dumps(obj, ensure_ascii=False)
+
 
 def get_all_items(table) -> list:
     """
@@ -77,7 +76,6 @@ def get_item(table, key: str, value: str) -> dict:
     return response["Item"]
 
 
-# TODO: POST, PUT, DELETEの実装
 def post_item(table, item: dict) -> dict:
     """テーブルにアイテムを追加する
     Args:
@@ -143,6 +141,32 @@ def delete_item(table, key: str, value: str) -> dict:
     response = table.delete_item(Key={key: value}, ReturnValues="NONE")
     if response["ResponseMetadata"]["HTTPStatusCode"] != 200:
         raise DynamoDBError(f"Failed to find {table.name} with {key}: {value}")
+
+
+def delete_desk_user(desk_id: str) -> dict:
+    """テーブルからデスクのユーザー情報を削除する"""
+    expr = ", ".join(
+        [
+            "SET updated_at=:updated_at",
+            "username=:username",
+            "email=:email",
+        ]
+    )
+
+    update_object = {
+        ":updated_at": datetime.now().isoformat(),
+        ":username": None,
+        ":email": None,
+    }
+
+    try:
+        response = put_item(qa_table, "desk_id", desk_id, expr, update_object)
+    except DynamoDBError as e:
+        raise e
+    except IndexError as e:
+        raise e
+    return response
+
 
 class DynamoDBError(Exception):
     pass
