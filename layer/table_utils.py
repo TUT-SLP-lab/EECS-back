@@ -155,8 +155,8 @@ def delete_desk_user(desk_id: str) -> dict:
 
     update_object = {
         ":updated_at": datetime.now().isoformat(),
-        ":username": None,
-        ":email": None,
+        ":username": " ",
+        ":email": " ",
     }
 
     try:
