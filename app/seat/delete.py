@@ -1,7 +1,5 @@
-import datetime
-
 from responses import delete_response
-from table_utils import DynamoDBError, delete_desk_user, json_dumps, qa_table
+from table_utils import DynamoDBError, delete_desk_user, json_dumps
 
 
 def lambda_handler(event, context):
