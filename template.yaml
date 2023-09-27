@@ -223,6 +223,7 @@ Resources:
       GenerateSecret: false
       CallbackURLs:
         - !Ref ClientURL
+        - https://localhost:3001
       AllowedOAuthFlows:
         - "code"
       AllowedOAuthScopes:
