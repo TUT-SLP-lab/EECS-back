@@ -7,7 +7,8 @@ import boto3
 from boto3.dynamodb.conditions import Key
 
 PR_NUM = os.environ["PR_NUM"]
-DESK_TABLE = f"EECS-DeskTable-{PR_NUM}"
+PRODUCT_NAME = os.environ["PRODUCT_NAME"]
+DESK_TABLE = f"{PRODUCT_NAME}-DeskTable-{PR_NUM}"
 
 dynamodb = boto3.resource("dynamodb")
 desk_table = dynamodb.Table(DESK_TABLE)
