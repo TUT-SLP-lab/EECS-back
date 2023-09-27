@@ -37,6 +37,7 @@ Globals:
     Environment:
       Variables:
         PR_NUM: !Ref PrNumber
+        PRODUCT_NAME: !Ref ProductName
     Layers:
       - !Ref LambdaLayer
 
