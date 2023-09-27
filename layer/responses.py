@@ -31,7 +31,7 @@ def send_response(status_code, body, header):
     return {
         "statusCode": status_code,
         "body": body,
-        "headers": header,
+        # "headers": header,
     }
 
 
