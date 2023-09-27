@@ -7,11 +7,10 @@ import boto3
 from boto3.dynamodb.conditions import Key
 
 PR_NUM = os.environ["PR_NUM"]
-QA_TABLE = f"EECS-DeskTable-{PR_NUM}"
-print(f"QA_TABLE: {QA_TABLE}")
+DESK_TABLE = f"EECS-DeskTable-{PR_NUM}"
 
-dynamodb = boto3.resource("dynamodb", region_name="ap-northeast-1")
-qa_table = dynamodb.Table(QA_TABLE)
+dynamodb = boto3.resource("dynamodb")
+desk_table = dynamodb.Table(DESK_TABLE)
 
 
 def translate_object(obj):
@@ -170,7 +169,7 @@ def delete_desk_user(desk_id: str) -> dict:
     }
 
     try:
-        response = put_item(qa_table, "desk_id", desk_id, expr, update_object)
+        response = put_item(desk_table, "desk_id", desk_id, expr, update_object)
     except DynamoDBError as e:
         raise e
     except IndexError as e:
