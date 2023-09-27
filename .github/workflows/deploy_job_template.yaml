@@ -73,7 +73,7 @@ jobs:
         id: deploy_step
         run: |
           sam build
-          sam deploy --template-file .aws-sam/build/template.yaml --stack-name ${STACK_NAME} --capabilities CAPABILITY_NAMED_IAM --s3-bucket ${AWS_S3_BUCKET} --no-fail-on-empty-changeset --parameter-overrides PrNumber=${PR_NUMBER} SlackClientId=${{ secrets.SLACK_APP_CLIENT_ID }} SlackClientSecret=${{ secrets.SLACK_APP_CLIENT_SECRET }} SenderEmail=${{ secrets.SENDER_EMAIL }} ClientURL=${{ secrets.CLIENT_URL }}
+          sam deploy --template-file .aws-sam/build/template.yaml --stack-name ${STACK_NAME} --capabilities CAPABILITY_NAMED_IAM --s3-bucket ${AWS_S3_BUCKET} --no-fail-on-empty-changeset --parameter-overrides PrNumber=${PR_NUMBER} SlackClientId=${{ secrets.SLACK_APP_CLIENT_ID }} SlackClientSecret=${{ secrets.SLACK_APP_CLIENT_SECRET }} SenderEmail=${{ secrets.SENDER_EMAIL }} ClientOrigin=${{ secrets.CLIENT_URL }}
           deployed_url=$(aws cloudformation describe-stacks --stack-name ${STACK_NAME} --query "Stacks[0].Outputs[?OutputKey=='ApiUrl'].OutputValue" --output text)
           echo "deployed_url=$deployed_url" >> $GITHUB_OUTPUT
 
