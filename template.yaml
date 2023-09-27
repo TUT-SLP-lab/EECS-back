@@ -25,7 +25,7 @@ Parameters:
   SenderEmail:
     Type: String
     Description: from address using cognito
-  ClientOrigin:
+  ClientURL:
     Type: String
     Description: System Client URL
     Default: https://example.com
@@ -48,7 +48,7 @@ Resources:
       Name: !Sub ${ProductName}-${PrNumber}
       StageName: !Ref StageName
       Cors:
-        AllowOrigin: !Sub "'${ClientOrigin}'"
+        AllowOrigin: !Sub "'${ClientURL}'"
         AllowMethods: "'GET,POST,PUT,DELETE,OPTIONS'"
         AllowHeaders: "'Content-Type,X-CSRF-TOKEN,Authorization'"
         MaxAge: "'600'"
@@ -222,7 +222,7 @@ Resources:
         - !Ref SlackIdentityProvider
       GenerateSecret: false
       CallbackURLs:
-        - !Sub "https://${ClientOrigin}"
+        - !Sub "${ClientURL}"
         - https://localhost:3001
       AllowedOAuthFlows:
         - "code"
