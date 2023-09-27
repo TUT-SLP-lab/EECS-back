@@ -48,16 +48,7 @@ paths:
       responses:
         "200":
           $ref: "#/components/responses/DeskArray"
-    delete:
-      tags:
-        - edit
-      operationId: delete-desk
-      description: 机の削除
-      requestBody:
-        $ref: "#/components/requestBodies/DeleteDesk"
-      responses:
-        "200":
-          $ref: "#/components/responses/Desk"
+
   /edit/{room}:
     post:
       tags:
@@ -66,11 +57,20 @@ paths:
       description: 机の新規作成
       parameters:
         - $ref: "#/components/parameters/room_path"
-      requestBody:
-        $ref: "#/components/requestBodies/CreateDesk"
       responses:
         "200":
           $ref: "#/components/responses/Desk"
+  /edit/{desk_id}:
+    delete:
+      tags:
+        - edit
+      operationId: delete-desk
+      description: 机の削除
+      parameters:
+        - $ref: "#/components/parameters/desk_id_path"
+      responses:
+        "200":
+          $ref: "#/components/responses/DeleteSuccess"
 
 components:
   schemas:
@@ -202,12 +202,6 @@ components:
               $ref: "#/components/schemas/Desk"
 
   requestBodies:
-    CreateDesk:
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/Room"
     UpdateDesk:
       required: true
       content:
@@ -216,9 +210,3 @@ components:
             type: array
             items:
               $ref: "#/components/schemas/Desk"
-    DeleteDesk:
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/Desk"
