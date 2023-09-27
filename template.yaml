@@ -50,7 +50,7 @@ Resources:
       Cors:
         AllowOrigin: !Sub "'${ClientURL}'"
         AllowMethods: "'GET,POST,PUT,DELETE,OPTIONS'"
-        AllowHeaders: "'Content-Type,X-CSRF-TOKEN'"
+        AllowHeaders: "'Content-Type,X-CSRF-TOKEN,Authorization'"
         MaxAge: "'600'"
         AllowCredentials: true
       Auth:
