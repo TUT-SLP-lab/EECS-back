@@ -4,7 +4,6 @@ info:
   version: "0.1"
   description: Test
 
-# TODO: 下の情報を参考に今回のプロダクト用のシステムに修正する
 paths:
   /desk:
     get:
@@ -23,8 +22,6 @@ paths:
       description: 着席位置の登録（入室）
       parameters:
         - $ref: "#/components/parameters/desk_id_path"
-      requestBody:
-        $ref: "#/components/requestBodies/RegisterDesk"
       responses:
         "200":
           $ref: "#/components/responses/Desk"
@@ -37,8 +34,40 @@ paths:
       description: 着席情報の削除（退室）
       parameters:
         - $ref: "#/components/parameters/desk_id_path"
+      responses:
+        "200":
+          $ref: "#/components/responses/Desk"
+  /edit:
+    put:
+      tags:
+        - edit
+      operationId: put-update-desks
+      description: 全ての机の更新
       requestBody:
-        $ref: "#/components/requestBodies/RegisterDesk"
+        $ref: "#/components/requestBodies/UpdateDesk"
+      responses:
+        "200":
+          $ref: "#/components/responses/DeskArray"
+    delete:
+      tags:
+        - edit
+      operationId: delete-desk
+      description: 机の削除
+      requestBody:
+        $ref: "#/components/requestBodies/DeleteDesk"
+      responses:
+        "200":
+          $ref: "#/components/responses/Desk"
+  /edit/{room}:
+    post:
+      tags:
+        - edit
+      operationId: post-create-desk
+      description: 机の新規作成
+      parameters:
+        - $ref: "#/components/parameters/room_path"
+      requestBody:
+        $ref: "#/components/requestBodies/CreateDesk"
       responses:
         "200":
           $ref: "#/components/responses/Desk"
@@ -61,6 +90,10 @@ components:
       nullable: true
       readOnly: true
       example: 田中夏子
+    Room:
+      type: string
+      description: f-301 or f-310
+      example: f-301
 
     Desk:
       type: object
@@ -68,9 +101,7 @@ components:
         desk_id:
           $ref: "#/components/schemas/DeskID"
         room:
-          type: string
-          description: f-301 or f-310
-          example: f-301
+          $ref: "#/components/schemas/Room"
         email:
           $ref: "#/components/schemas/Email"
         username:
@@ -99,7 +130,6 @@ components:
               type: integer
               description: 机の縦方向のサイズ
               example: 10
-        # timestamp:
         created_at:
           type: string
           format: datetime
@@ -118,7 +148,8 @@ components:
         - username
         - position
         - size
-        - timestamp
+        - created_at
+        - update_at
 
     User:
       type: object
@@ -138,6 +169,13 @@ components:
       required: True
       schema:
         $ref: '#/components/schemas/DeskID'
+    room_path:
+      name: room
+      in: path
+      required: True
+      schema:
+        $ref: '#/components/schemas/Room'
+
 
   responses:
     DeleteSuccess:
@@ -162,22 +200,23 @@ components:
             type: array
             items:
               $ref: "#/components/schemas/Desk"
-    User:
-      description: ユーザーの詳細
+
+  requestBodies:
+    CreateDesk:
+      required: true
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/User"
-    UserArray:
-      description: ユーザーの一覧
+            $ref: "#/components/schemas/Room"
+    UpdateDesk:
+      required: true
       content:
         application/json:
           schema:
             type: array
             items:
-              $ref: "#/components/schemas/User"
-  requestBodies:
-    RegisterDesk:
+              $ref: "#/components/schemas/Desk"
+    DeleteDesk:
       required: true
       content:
         application/json:
