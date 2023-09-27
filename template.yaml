@@ -220,6 +220,7 @@ Resources:
         - "ALLOW_REFRESH_TOKEN_AUTH"
       PreventUserExistenceErrors: "ENABLED"
       SupportedIdentityProviders:
+        - COGNITO
         - !Ref SlackIdentityProvider
       GenerateSecret: false
       CallbackURLs:
