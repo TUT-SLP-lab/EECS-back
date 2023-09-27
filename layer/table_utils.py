@@ -1,19 +1,29 @@
 import datetime
 import json
 import os
+from decimal import Decimal
 
 import boto3
 from boto3.dynamodb.conditions import Key
 
 PR_NUM = os.environ["PR_NUM"]
-QA_TABLE = f"DeskTable-{PR_NUM}"
+QA_TABLE = f"EECS-DeskTable-{PR_NUM}"
+print(f"QA_TABLE: {QA_TABLE}")
 
-dynamodb = boto3.resource("dynamodb")
+dynamodb = boto3.resource("dynamodb", region_name="ap-northeast-1")
 qa_table = dynamodb.Table(QA_TABLE)
 
 
+def translate_object(obj):
+    if isinstance(obj, Decimal):
+        return int(obj)
+    if isinstance(obj, set):
+        return list(obj)
+    return obj
+
+
 def json_dumps(obj):
-    return json.dumps(obj, ensure_ascii=False)
+    return json.dumps(obj, default=translate_object, ensure_ascii=False)
 
 
 def get_all_items(table) -> list:
