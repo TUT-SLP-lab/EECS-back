@@ -3,7 +3,14 @@ import datetime
 import json
 
 from responses import put_response
-from table_utils import DynamoDBError, get_item, json_dumps, put_item, delete_desk_user, qa_table
+from table_utils import (
+    DynamoDBError,
+    delete_desk_user,
+    desk_table,
+    get_item,
+    json_dumps,
+    put_item,
+)
 
 
 def lambda_handler(event, context):
@@ -20,7 +27,7 @@ def lambda_handler(event, context):
 
     # 他の机に名前がある場合 -> 名前とEmailを削除
     try:
-        item = get_item(qa_table, "email", email)
+        item = get_item(desk_table, "email", email)
         delete_desk_id = item["Item"]["desk_id"]
 
         try:
@@ -47,7 +54,7 @@ def lambda_handler(event, context):
     }
 
     try:
-        response = put_item(qa_table, "desk_id", desk_id, expr, update_object)
+        response = put_item(desk_table, "desk_id", desk_id, expr, update_object)
     except DynamoDBError as e:
         return put_response(500, f"Internal Server Error: DynamoDB Error: {e}")
     except IndexError as e:

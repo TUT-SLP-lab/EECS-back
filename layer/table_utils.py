@@ -6,10 +6,10 @@ import boto3
 from boto3.dynamodb.conditions import Key
 
 PR_NUM = os.environ["PR_NUM"]
-QA_TABLE = f"DeskTable-{PR_NUM}"
+DESK_TABLE = f"DeskTable-{PR_NUM}"
 
 dynamodb = boto3.resource("dynamodb")
-qa_table = dynamodb.Table(QA_TABLE)
+desk_table = dynamodb.Table(DESK_TABLE)
 
 
 def json_dumps(obj):
@@ -160,7 +160,7 @@ def delete_desk_user(desk_id: str) -> dict:
     }
 
     try:
-        response = put_item(qa_table, "desk_id", desk_id, expr, update_object)
+        response = put_item(desk_table, "desk_id", desk_id, expr, update_object)
     except DynamoDBError as e:
         raise e
     except IndexError as e:
