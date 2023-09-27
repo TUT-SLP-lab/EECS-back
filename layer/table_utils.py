@@ -93,7 +93,7 @@ def post_item(table, item: dict) -> dict:
 
 
 def put_item(table, key: str, value: str, UpdExp: str, ExpAtt: dict, ExpAttName: dict = None) -> dict:
-    """テーブルにアイテムを追加する
+    """テーブルのアイテムを更新する
     Args:
         table (boto3.resource.Table): テーブル
         key (str): キー
