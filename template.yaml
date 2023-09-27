@@ -61,10 +61,10 @@ Resources:
             UserPoolArn: !GetAtt CognitoUserPool.Arn
 
   LambdaLayer:
-    Type: 'AWS::Serverless::LayerVersion'
+    Type: "AWS::Serverless::LayerVersion"
     Properties:
       LayerName: !Sub ${ProductName}-Layer-${PrNumber}
-      Description: 'Tarako Lambda Layer'
+      Description: !Sub "${ProductName} Lambda Layer"
       ContentUri: ./layer/
       CompatibleRuntimes:
         - python3.10
@@ -73,11 +73,11 @@ Resources:
       BuildMethod: python3.10
 
   LambdaExecutionRole:
-    Type: 'AWS::IAM::Role'
+    Type: "AWS::IAM::Role"
     Properties:
       RoleName: !Sub ${ProductName}-LambdaExecutionRole-${PrNumber}
       AssumeRolePolicyDocument:
-        Version: '2012-10-17'
+        Version: "2012-10-17"
         Statement:
           - Effect: Allow
             Principal:
@@ -86,7 +86,7 @@ Resources:
       Policies:
         - PolicyName: DynamoDBAccessPolicy
           PolicyDocument:
-            Version: '2012-10-17'
+            Version: "2012-10-17"
             Statement:
               - Effect: Allow
                 Action:
@@ -96,7 +96,7 @@ Resources:
 
   # Lambda Functions
   GetDesks:
-    Type: 'AWS::Serverless::Function'
+    Type: "AWS::Serverless::Function"
     Properties:
       CodeUri: app/desks/
       Handler: gets.lambda_handler
@@ -209,7 +209,7 @@ Resources:
 
   CognitoUserPoolClient:
     Type: "AWS::Cognito::UserPoolClient"
-    DependsOn: 
+    DependsOn:
       - SlackIdentityProvider
     Properties:
       UserPoolId: !Ref CognitoUserPool
@@ -234,9 +234,9 @@ Resources:
       IdTokenValidity: 1
       AccessTokenValidity: 1
       TokenValidityUnits:
-          AccessToken: "days"
-          IdToken: "days"
-          RefreshToken: "days"
+        AccessToken: "days"
+        IdToken: "days"
+        RefreshToken: "days"
 
   SlackIdentityProvider:
     Type: "AWS::Cognito::UserPoolIdentityProvider"
@@ -258,5 +258,5 @@ Resources:
 
 Outputs:
   ApiUrl:
-    Description: 'API Gateway endpoint URL for Prod stage'
-    Value: !Sub 'https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/${StageName}'
+    Description: "API Gateway endpoint URL for Prod stage"
+    Value: !Sub "https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/${StageName}"
