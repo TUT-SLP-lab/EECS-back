@@ -1,13 +1,13 @@
 import base64
-import datetime
 import json
+from datetime import datetime
 
 from responses import put_response
 from table_utils import (
     DynamoDBError,
     delete_desk_user,
     desk_table,
-    get_item,
+    get_items,
     json_dumps,
     put_item,
 )
@@ -27,8 +27,10 @@ def lambda_handler(event, context):
 
     # 他の机に名前がある場合 -> 名前とEmailを削除
     try:
-        item = get_item(desk_table, "email", email)
-        delete_desk_id = item["Item"]["desk_id"]
+        index_name = "EmailIndex"
+        expr = Key("email").eq(email)
+        item = get_items(desk_table, index_name, expr)[0]
+        delete_desk_id = item["desk_id"]
 
         try:
             delete_desk_user(delete_desk_id)
@@ -36,6 +38,8 @@ def lambda_handler(event, context):
             return put_response(500, f"Internal Server Error: DynamoDB Error: {e}")
         except IndexError as e:
             return put_response(404, f"Not Found: {e}")
+        except Exception as e:
+            return put_response(500, f"Internal Server Error: {e}")
     except IndexError:
         pass
 
@@ -59,5 +63,7 @@ def lambda_handler(event, context):
         return put_response(500, f"Internal Server Error: DynamoDB Error: {e}")
     except IndexError as e:
         return put_response(404, f"Not Found: {e}")
+    except Exception as e:
+        return put_response(500, f"Internal Server Error: {e}")
 
     return put_response(200, json_dumps(response))
