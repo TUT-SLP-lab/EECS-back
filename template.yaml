@@ -224,8 +224,8 @@ Resources:
         - !Ref SlackIdentityProvider
       GenerateSecret: false
       CallbackURLs:
+        - http://localhost:3001
         - !Sub "${ClientURL}"
-        - https://localhost:3001
       AllowedOAuthFlows:
         - "code"
       AllowedOAuthScopes:
