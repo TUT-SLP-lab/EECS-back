@@ -2,6 +2,7 @@ import base64
 import json
 from datetime import datetime
 
+from boto3.dynamodb.conditions import Key
 from responses import put_response
 from table_utils import (
     DynamoDBError,
@@ -19,7 +20,8 @@ def lambda_handler(event, context):
         return put_response(400, "Bad Request: Invalid path parameters")
     desk_id = ppm.get("desk_id", None)
     token = event.get("headers").get("Authorization")
-    payload = base64.b64decode(token)
+    payload = token.split(".")[1]
+    payload = base64.b64decode(payload + "==").decode("utf-8")
     payload = json.loads(payload)
 
     username = payload["name"]
