@@ -92,8 +92,7 @@ Resources:
               - Effect: Allow
                 Action:
                   - dynamodb:*
-                Resource:
-                  - !GetAtt DeskTable.Arn
+                Resource: "*"
         - PolicyName: AWSLambdaBasicExecutionRole
           PolicyDocument:
             Version: "2012-10-17"
