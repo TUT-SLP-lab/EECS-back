@@ -114,7 +114,7 @@ Resources:
     Type: "AWS::Serverless::Function"
     Properties:
       CodeUri: app/seat/
-      Handler: post.lambda_handler
+      Handler: put.lambda_handler
       FunctionName: !Sub ${ProductName}-desk-registration-${PrNumber}
       Role: !GetAtt LambdaExecutionRole.Arn
       Events:
