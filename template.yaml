@@ -94,6 +94,16 @@ Resources:
                   - dynamodb:*
                 Resource:
                   - !GetAtt DeskTable.Arn
+        - PolicyName: AWSLambdaBasicExecutionRole
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: "*"
 
   # Lambda Functions
   GetDesks:
@@ -210,8 +220,6 @@ Resources:
 
   CognitoUserPoolClient:
     Type: "AWS::Cognito::UserPoolClient"
-    DependsOn:
-      - SlackIdentityProvider
     Properties:
       UserPoolId: !Ref CognitoUserPool
       ClientName: !Sub ${ProductName}-CognitoUserPoolClient-${PrNumber}
