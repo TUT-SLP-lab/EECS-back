@@ -20,8 +20,7 @@ def lambda_handler(event, context):
         return put_response(400, "Bad Request: Invalid path parameters")
     desk_id = ppm.get("desk_id", None)
     token = event.get("headers").get("Authorization")
-    payload = token.split(".")[1]
-    payload = base64.b64decode(payload + "==").decode("utf-8")
+    payload = base64.b64decode(token.split(".")[1] + "==").decode("utf-8")
     payload = json.loads(payload)
 
     username = payload["name"]
