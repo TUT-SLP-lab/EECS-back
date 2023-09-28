@@ -1,6 +1,7 @@
 import base64
 import json
 from datetime import datetime
+import jwt
 
 from boto3.dynamodb.conditions import Key
 from responses import put_response
@@ -21,8 +22,7 @@ def lambda_handler(event, context):
     desk_id = ppm.get("desk_id", None)
     token = event.get("headers").get("Authorization")
     try:
-        payload = base64.b64decode(token.split(".")[1] + "==").decode("utf-8")
-        payload = json.loads(payload)
+        payload = jwt.decode(token, options={"verify_signature": False})
     except Exception as e:
         return put_response(500, f"Internal Server Error: {e}")
 
