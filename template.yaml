@@ -148,6 +148,26 @@ Resources:
             Method: DELETE
             RestApiId: !Ref ApiGateway
 
+  # Lambda Cron job
+  AllDeskUnregistration:
+    Type: "AWS::Serverless::Function"
+    Properties:
+      CodeUri: app/cron_job/
+      Handler: all_desk_unregistration.lambda_handler
+      FunctionName: !Sub ${ProductName}-all-desk-unregistration-${PrNumber}
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Events:
+        AllDeskUnregistrationCronEvent:
+          Type: Schedule
+          Properties:
+            Schedule: cron(0 19 * * ? *) # 04:00 JST
+        AllDeskUnregistrationApiEvent:
+          Type: Api
+          Properties:
+            Path: /desk/all
+            Method: DELETE
+            RestApiId: !Ref ApiGateway
+
   # Dynamodb Tables
   DeskTable:
     Type: "AWS::DynamoDB::Table"
