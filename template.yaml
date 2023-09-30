@@ -42,9 +42,7 @@ Globals:
       Variables:
         PR_NUM: !Ref PrNumber
         PRODUCT_NAME: !Ref ProductName
-        CLIENT_URLS:
-          - !Ref ClientURL
-          - !Ref ClientURLOwnDomain
+        CLIENT_URLS: !Sub "${ClientURL},${ClientURLOwnDomain}"
     Layers:
       - !Ref LambdaLayer
 
