@@ -33,7 +33,8 @@ on:
       CLIENT_URL:
         required: true
       CLIENT_URL_OWN_DOMAIN:
-        required: true
+        required: false
+        default: 'https://example.com'
 
 env:
   AWS_REGION: 'ap-northeast-1'
