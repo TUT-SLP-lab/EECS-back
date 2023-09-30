@@ -14,15 +14,16 @@ from table_utils import (
 
 
 def lambda_handler(event, context):
+    origin = event.get("headers").get("Origin")
     ppm = event.get("pathParameters", {})
     if ppm is None:
-        return put_response(400, "Bad Request: Invalid path parameters")
+        return put_response(400, "Bad Request: Invalid path parameters", origin)
     desk_id = ppm.get("desk_id", None)
     token = event.get("headers").get("Authorization")
     try:
         payload = jwt.decode(token, options={"verify_signature": False})
     except Exception as e:
-        return put_response(500, f"Internal Server Error: {e}")
+        return put_response(500, f"Internal Server Error: {e}", origin)
 
     username = payload["name"]
     email = payload["email"]
@@ -37,11 +38,11 @@ def lambda_handler(event, context):
         try:
             delete_desk_user(delete_desk_id)
         except DynamoDBError as e:
-            return put_response(500, f"Internal Server Error: DynamoDB Error: {e}")
+            return put_response(500, f"Internal Server Error: DynamoDB Error: {e}", origin)
         except IndexError as e:
-            return put_response(404, f"Not Found: {e}")
+            return put_response(404, f"Not Found: {e}", origin)
         except Exception as e:
-            return put_response(500, f"Internal Server Error: {e}")
+            return put_response(500, f"Internal Server Error: {e}", origin)
     except IndexError:
         pass
 
@@ -62,10 +63,10 @@ def lambda_handler(event, context):
     try:
         response = put_item(desk_table, "desk_id", desk_id, expr, update_object)
     except DynamoDBError as e:
-        return put_response(500, f"Internal Server Error: DynamoDB Error: {e}")
+        return put_response(500, f"Internal Server Error: DynamoDB Error: {e}", origin)
     except IndexError as e:
-        return put_response(404, f"Not Found: {e}")
+        return put_response(404, f"Not Found: {e}", origin)
     except Exception as e:
-        return put_response(500, f"Internal Server Error: {e}")
+        return put_response(500, f"Internal Server Error: {e}", origin)
 
-    return put_response(200, json_dumps(response))
+    return put_response(200, json_dumps(response), origin)

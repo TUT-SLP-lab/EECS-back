@@ -29,6 +29,10 @@ Parameters:
     Type: String
     Description: System Client URL
     Default: https://example.com
+  ClientURLOwnDomain:
+    Type: String
+    Description: System Client URL
+    Default: https://example.com
 
 Globals:
   Function:
@@ -38,7 +42,9 @@ Globals:
       Variables:
         PR_NUM: !Ref PrNumber
         PRODUCT_NAME: !Ref ProductName
-        CLIENT_URL: !Ref ClientURL
+        CLIENT_URLS:
+          - !Ref ClientURL
+          - !Ref ClientURLOwnDomain
     Layers:
       - !Ref LambdaLayer
 
@@ -252,7 +258,8 @@ Resources:
       GenerateSecret: false
       CallbackURLs:
         - http://localhost:3001
-        - !Sub "${ClientURL}"
+        - !Ref ClientURL
+        - !Ref ClientURLOwnDomain
       AllowedOAuthFlows:
         - "code"
       AllowedOAuthScopes:
